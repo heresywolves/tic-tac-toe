@@ -75,16 +75,16 @@ const game = (function (doc) {
     if (!space.innerText) {
       board.array[id] = currentTurn.mark;
       board.refresh();
-      if (checkTie()) {
-        cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
-        cacheDom.turn.innerHTML = 'TIE';
-        return;
-      }
       let winningSquares = checkWin(currentTurn.mark);
       if (winningSquares) {
         cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
         board.colorSpaces(winningSquares);
         cacheDom.turn.innerHTML = (currentTurn === player1) ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS';
+        return;
+      }
+      if (checkTie()) {
+        cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
+        cacheDom.turn.innerHTML = 'TIE';
         return;
       }
       (currentTurn === player1) ? currentTurn = player2 : currentTurn = player1;
