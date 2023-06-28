@@ -8,20 +8,28 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-  <div id="board-container">
-    <div id="board">
-      <div class="space"></div>
-      <div class="space"></div>
-      <div class="space"></div>
-      <div class="space"></div>
-      <div class="space"></div>
-      <div class="space"></div>
-      <div class="space"></div>
-      <div class="space"></div>
-      <div class="space"></div>
-    </div>
+  <div class="header">
+    <button class="reset">RESET</button>
   </div>
+
+  <div class="center">
+    <div id="board-container">
+      <div id="board">
+        <div class="space" id="1"></div>
+        <div class="space" id="2"></div>
+        <div class="space" id="3"></div>
+        <div class="space" id="4"></div>
+        <div class="space" id="5"></div>
+        <div class="space" id="6"></div>
+        <div class="space" id="7"></div>
+        <div class="space" id="8"></div>
+        <div class="space" id="9"></div>
+      </div>
+    </div>
+    <p class="current-turn"></p>
+  </div>
+
+  <div class="footer"></div>
   
   <script src="javascript.js"></script>
 </body>
