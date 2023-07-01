@@ -22,9 +22,24 @@
     display: flex;
     gap: 50px;
     justify-content: center;
+    align-items: center;
+  }
+
+
+  .header img {
+    height: 10px;
+    margin-left: 20px;
+  }
+
+  .header a {
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: white;
+    font-family: 'Moulpali', cursive;
   }
 
   .header button {
+    height: 25px;
     background-color: rgb(17, 17, 17);
     border: none;
     color: white;

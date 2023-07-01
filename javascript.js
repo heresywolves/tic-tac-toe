@@ -37,6 +37,14 @@ const game = (function (doc) {
           makeRandomMove();
         }
       }
+      else if (mode === 'hard') {
+        if (currentTurn === player1) {
+          addSpacesListeners();
+        }
+        else if (currentTurn === player2) {
+          makeMinimaxMove();
+        }
+      }
     }
     const colorSpaces = function (winningSquares) {
       for (let i = 0; i < 3; i++) {
@@ -70,6 +78,7 @@ const game = (function (doc) {
     else return null;
   }
 
+
   function checkTie() {
     const arr = board.array;
     for (let i = 0; i < arr.length; i++) {
@@ -78,9 +87,11 @@ const game = (function (doc) {
     return true;
   }
 
+
   function setTurnText() {
     cacheDom.turn.innerText = (currentTurn === player1) ? 'TURN: PLAYER 1' : 'TURN: PLAYER 2';
   }
+
 
   function makeMove(evt) {
     const space = evt.currentTarget;
@@ -104,15 +115,25 @@ const game = (function (doc) {
       setTurnText();
     }
     easyModeAi();
+    hardModeAi();
   }
+
 
   function easyModeAi() {
     if (mode === 'easy' && currentTurn === player2) {
       cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
       makeRandomMove();
-
     }
   }
+
+
+  function hardModeAi() {
+    if (mode === 'hard' && currentTurn === player2) {
+      cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
+      makeMinimaxMove();
+    }
+  }
+
 
   function makeRandomMove() {
     const randomID = Math.floor(Math.random() * 9);
@@ -138,13 +159,92 @@ const game = (function (doc) {
     else {
       makeRandomMove();
     }
+    addSpacesListeners();
+  }
+
+
+  function minimax(board, depth, isMaximizing) {
+    let player1wins = checkWin(player1.mark);
+    let player2wins = checkWin(player2.mark);
+    let isTie = checkTie();
+    if (player1wins) {
+      return -1;
+    }
+    else if (player2wins) {
+      return 1;
+    }
+    else if (isTie) {
+      return 0;
+    }
+
+    if (isMaximizing) {
+      let bestScore = -Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) {
+          board[i] = player2.mark;
+          let score = minimax(board, depth+1, false);
+          board[i] = null;
+          bestScore = Math.max(bestScore, score);
+        }
+      }
+      return bestScore;
+    } else {
+      let bestScore = Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) {
+          board[i] = player1.mark;
+          let score = minimax(board, depth+1, true);
+          board[i] = null;
+          bestScore = Math.min(bestScore, score);
+        }
+      }
+      return bestScore;
+    }
+  }
+
+  function makeMinimaxMove() {
+    let move;
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < board.array.length; i++) {
+      if (board.array[i] === null) {
+        board.array[i] = player2.mark;
+        let score = minimax(board.array, 0, false);
+        board.array[i] = null;
+        if (score > bestScore) {
+          bestScore = score;
+          move = i;
+        }
+      }
+    }
+
+
+    board.array[move] = player2.mark;
+    board.refresh();
+    let winningSquares = checkWin(player2.mark);
+    if (winningSquares) {
+      cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
+      board.colorSpaces(winningSquares);
+      cacheDom.turn.innerHTML = (currentTurn === player1) ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS';
+      return;
+    }
+    if (checkTie()) {
+      cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
+      cacheDom.turn.innerHTML = 'TIE';
+      return;
+    }
+
+    currentTurn = player1;
+    setTurnText();
 
     addSpacesListeners();
   }
 
+
   function addSpacesListeners() {
     cacheDom.spaces.forEach(space => space.addEventListener('click', makeMove));
   }
+
 
   const Player = (mark) => {
     return { mark };
@@ -178,6 +278,7 @@ const game = (function (doc) {
     board.clear();
     cacheDom.easy.classList.add('active');
     cacheDom.twoPlayers.classList.remove('active');
+    cacheDom.hard.classList.remove('active');
   }
 
   function setPlayerMode() {
@@ -185,12 +286,21 @@ const game = (function (doc) {
     board.clear();
     cacheDom.easy.classList.remove('active');
     cacheDom.twoPlayers.classList.add('active');
+    cacheDom.hard.classList.remove('active');
+  }
 
+  function setHardMode() {
+    mode = 'hard';
+    board.clear();
+    cacheDom.hard.classList.add('active');
+    cacheDom.twoPlayers.classList.remove('active');
+    cacheDom.easy.classList.remove('active');
   }
 
   cacheDom.reset.addEventListener('click', board.clear);
   cacheDom.easy.addEventListener('click', setEasyMode);
   cacheDom.twoPlayers.addEventListener('click', setPlayerMode);
+  cacheDom.hard.addEventListener('click', setHardMode);
   setTurnText();
 
   return { cacheDom, board };
