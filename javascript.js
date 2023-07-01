@@ -4,7 +4,10 @@ const game = (function (doc) {
     const spaces = doc.querySelectorAll('.space');
     const turn = doc.querySelector('.current-turn');
     const reset = doc.querySelector('button.reset');
-    return { spaces, turn, reset };
+    const twoPlayers = doc.querySelector('button.vs-player');
+    const easy = doc.querySelector('button.ai-easy');
+    const hard = doc.querySelector('button.ai-hard');
+    return { spaces, turn, reset, twoPlayers, easy, hard };
   })();
 
 
@@ -20,10 +23,20 @@ const game = (function (doc) {
       for (let i = 0; i < array.length; i++) {
         array[i] = null;
         cacheDom.spaces[i].classList.remove('colored');
-        addSpacesListeners();
         setTurnText();
       }
       refresh();
+      if (mode === 'players') {
+        addSpacesListeners();
+      }
+      else if (mode === 'easy') {
+        if (currentTurn === player1) {
+          addSpacesListeners();
+        }
+        else if (currentTurn === player2) {
+          makeRandomMove();
+        }
+      }
     }
     const colorSpaces = function (winningSquares) {
       for (let i = 0; i < 3; i++) {
@@ -90,24 +103,94 @@ const game = (function (doc) {
       (currentTurn === player1) ? currentTurn = player2 : currentTurn = player1;
       setTurnText();
     }
+    easyModeAi();
+  }
+
+  function easyModeAi() {
+    if (mode === 'easy' && currentTurn === player2) {
+      cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
+      makeRandomMove();
+
+    }
+  }
+
+  function makeRandomMove() {
+    const randomID = Math.floor(Math.random() * 9);
+    const space = doc.getElementById(String(randomID + 1));
+    if (!space.innerText) {
+      board.array[randomID] = player2.mark;
+      board.refresh();
+      let winningSquares = checkWin(player2.mark);
+      if (winningSquares) {
+        cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
+        board.colorSpaces(winningSquares);
+        cacheDom.turn.innerHTML = (currentTurn === player1) ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS';
+        return;
+      }
+      if (checkTie()) {
+        cacheDom.spaces.forEach(space => space.removeEventListener('click', makeMove));
+        cacheDom.turn.innerHTML = 'TIE';
+        return;
+      }
+      (currentTurn === player1) ? currentTurn = player2 : currentTurn = player1;
+      setTurnText();
+    }
+    else {
+      makeRandomMove();
+    }
+
+    addSpacesListeners();
   }
 
   function addSpacesListeners() {
     cacheDom.spaces.forEach(space => space.addEventListener('click', makeMove));
   }
-  addSpacesListeners();
-  cacheDom.reset.addEventListener('click', board.clear);
 
   const Player = (mark) => {
     return { mark };
   }
 
+
   let player1 = Player('×');
   let player2 = Player('○');
+  let mode = 'players';
+
   let currentTurn = (function () {
     const rand = Math.random();
     return (rand > 0.5) ? player1 : player2;
   })();
+
+
+  if (mode === 'players') {
+    addSpacesListeners();
+  }
+  else if (mode === 'easy') {
+    if (currentTurn === player1) {
+      addSpacesListeners();
+    }
+    else if (currentTurn === player2) {
+      makeRandomMove();
+    }
+  }
+
+  function setEasyMode() {
+    mode = 'easy';
+    board.clear();
+    cacheDom.easy.classList.add('active');
+    cacheDom.twoPlayers.classList.remove('active');
+  }
+
+  function setPlayerMode() {
+    mode = 'players';
+    board.clear();
+    cacheDom.easy.classList.remove('active');
+    cacheDom.twoPlayers.classList.add('active');
+
+  }
+
+  cacheDom.reset.addEventListener('click', board.clear);
+  cacheDom.easy.addEventListener('click', setEasyMode);
+  cacheDom.twoPlayers.addEventListener('click', setPlayerMode);
   setTurnText();
 
   return { cacheDom, board };

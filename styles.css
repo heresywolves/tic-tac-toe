@@ -20,6 +20,7 @@
     height: 25px;
     background-color: rgb(17, 17, 17);
     display: flex;
+    gap: 50px;
     justify-content: center;
   }
 
@@ -28,6 +29,22 @@
     border: none;
     color: white;
     cursor: pointer;
+    padding: 0px 5px 0px 5px;
+    transition: 0.5s;
+  }
+
+  .header button.active {
+    background-color: white;
+    color: black;
+  }
+
+  .header button.reset {
+    transition: 0s;
+  }
+  
+  .header button.reset:active {
+    background-color: white;
+    color: black;
   }
 
   .center {
